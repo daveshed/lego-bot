@@ -1,8 +1,18 @@
+"""
+The Adafruit PCA9685 driver requires an I2C interface defined in
+Adafruit_Python_GPIO https://github.com/adafruit/Adafruit_Python_GPIO and this
+low-level driver assumes that the code will be run on an embedded single board
+computer such as a rpi or beaglebone. It assumes an API that is not provided by
+the F232H driver. Therefore this adapter module is needed.
+"""
 import logging
 
-_LOGGER = logging.getLogger("FOO")
+import pyftdi.i2c
 
-PORT = None
+_CONTROLLER = pyftdi.i2c.I2cController()
+_CONTROLLER.configure('ftdi:///1')
+_LOGGER = logging.getLogger("I2C")
+
 
 def reverseByteOrder(data):
     """Reverses the byte order of an int (16-bit) or long (32-bit) value."""
@@ -18,28 +28,26 @@ def get_default_bus():
     raise NotImplementedError
 
 def get_i2c_device(address, busnum=None, i2c_interface=None, **kwargs):
-    """Return an I2C device for the specified address and on the specified bus.
-    If busnum isn't specified, the default I2C bus for the platform will attempt
-    to be detected.
+    """Return an I2C device for the specified address and on the specified
+    bus. If busnum isn't specified, the default I2C bus for the platform
+    will attempt to be detected.
     """
-    return Device(PORT)
-
+    return Device(_CONTROLLER.get_port(address))
 
 def require_repeated_start():
     """Enable repeated start conditions for I2C register reads.  This is the
     normal behavior for I2C, however on some platforms like the Raspberry Pi
-    there are bugs which disable repeated starts unless explicitly enabled with
-    this function.  See this thread for more details:
+    there are bugs which disable repeated starts unless explicitly enabled
+    with this function.  See this thread for more details:
       http://www.raspberrypi.org/forums/viewtopic.php?f=44&t=15840
     """
     raise NotImplementedError
 
-
 class Device:
-    """Class for communicating with an I2C device using the adafruit-pureio pure
-    python smbus library, or other smbus compatible I2C interface. Allows reading
-    and writing 8-bit, 16-bit, and byte array values to registers
-    on the device."""
+    """Class for communicating with an I2C device using the adafruit-pureio
+    pure python smbus library, or other smbus compatible I2C interface.
+    Allows reading and writing 8-bit, 16-bit, and byte array values to
+    registers on the device."""
     def __init__(self, port):
         self._port = port
         _LOGGER.info("Created an i2c device on %r", port)
@@ -51,9 +59,10 @@ class Device:
     def write8(self, register, value):
         """Write an 8-bit value to the specified register."""
         value = value & 0xFF
-        self._port.write_to(register, value.to_bytes(length=1, byteorder='big'))
+        self._port.write_to(
+            register, value.to_bytes(length=1, byteorder='big'))
         _LOGGER.debug("Wrote 0x%02X to register 0x%02X",
-                     value, register)
+            value, register)
 
     def write16(self, register, value):
         """Write a 16-bit value to the specified register."""
@@ -64,8 +73,8 @@ class Device:
         raise NotImplementedError
 
     def readList(self, register, length):
-        """Read a length number of bytes from the specified register.  Results
-        will be returned as a bytearray."""
+        """Read a length number of bytes from the specified register.
+        Results will be returned as a bytearray."""
         raise NotImplementedError
 
     def readRaw8(self):
@@ -88,20 +97,20 @@ class Device:
         return result
 
     def readU16(self, register, little_endian=True):
-        """Read an unsigned 16-bit value from the specified register, with the
-        specified endianness (default little endian, or least significant byte
-        first)."""
+        """Read an unsigned 16-bit value from the specified register, with
+        the specified endianness (default little endian, or least
+        significant byte first)."""
         raise NotImplementedError
 
     def readS16(self, register, little_endian=True):
         """Read a signed 16-bit value from the specified register, with the
-        specified endianness (default little endian, or least significant byte
-        first)."""
+        specified endianness (default little endian, or least significant
+        byte first)."""
         raise NotImplementedError
 
     def readU16LE(self, register):
-        """Read an unsigned 16-bit value from the specified register, in little
-        endian byte order."""
+        """Read an unsigned 16-bit value from the specified register, in
+        little endian byte order."""
         raise NotImplementedError
 
     def readU16BE(self, register):
