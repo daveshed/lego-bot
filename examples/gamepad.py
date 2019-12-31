@@ -1,5 +1,9 @@
+import logging
+
 from daveshed.legobot.inputs import gamepad as controller
 from daveshed.adafruit import joint
+
+logging.basicConfig(level=logging.INFO)
 
 
 class Grasper:
@@ -37,10 +41,11 @@ foo, bar, baz, zed = (
 )
 
 grasper = Grasper(zed)
-controller.YButtonPressed.handler = grasper.open
-controller.YButtonReleased.handler = grasper.close
 
-
+def handle_y_button_pressed(event):
+    grasper.open()
+def handle_y_button_released(event):
+    grasper.close()
 def handle_x_button_pressed(event):
     baz.angle += 1
 def handle_b_button_pressed(event):
@@ -54,12 +59,23 @@ def handle_up(event):
 def handle_down(event):
     bar.angle -= 1
 
-controller.XButtonPressed.handler = handle_x_button_pressed
-controller.BButtonPressed.handler = handle_b_button_pressed
-controller.LeftDpadPressed.handler = handle_left
-controller.RightDpadPressed.handler = handle_right
-controller.DownDpadPressed.handler = handle_down
-controller.UpDpadPressed.handler = handle_up
+controller.YButtonPressed.register_handler(handle_y_button_pressed)
+controller.YButtonReleased.register_handler(handle_y_button_released)
+controller.XButtonPressed.register_handler(handle_x_button_pressed)
+controller.BButtonPressed.register_handler(handle_b_button_pressed)
+controller.LeftDpadPressed.register_handler(handle_left)
+controller.RightDpadPressed.register_handler(handle_right)
+controller.DownDpadPressed.register_handler(handle_down)
+controller.UpDpadPressed.register_handler(handle_up)
 
-reader = controller.GamepadReader(daemon=True)
+from daveshed.legobot.inputs.base import UserInputEventConsumer
+from daveshed.legobot.inputs.gamepad import GamepadInputEvent
+import inputs
+
+pad = inputs.devices.gamepads[0]
+
+reader = UserInputEventConsumer(
+    device=pad,
+    event_type=GamepadInputEvent,
+    daemon=True)
 reader.start()

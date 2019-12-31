@@ -1,25 +1,9 @@
-import controller
-import servo
+import logging
 
+from daveshed.legobot.inputs import mouse as controller
+from daveshed.adafruit import joint
 
-from Adafruit_PCA9685 import PCA9685
-from pcaxxx import PcaChannelToServoChannel
-
-# This example also relies on the Adafruit motor library available here:
-# https://github.com/adafruit/Adafruit_CircuitPython_Motor
-# from adafruit_motor import servo
-
-
-import i2c_custom
-import pyftdi.i2c
-foo = pyftdi.i2c.I2cController()
-foo.configure('ftdi:///1')
-port = foo.get_port(0x40)
-i2c_custom.PORT = port
-
-
-pca = PCA9685(i2c=i2c_custom)
-pca.frequency = 50
+logging.basicConfig(level=logging.INFO)
 
 
 class Grasper:
@@ -51,27 +35,33 @@ class Grasper:
 
 
 # FIXME: define a robot object...
-foo = servo.Servo(PcaChannelToServoChannel(pca, 0))
-bar = servo.Servo(PcaChannelToServoChannel(pca, 1))
-baz = servo.Servo(PcaChannelToServoChannel(pca, 2))
-zed = servo.Servo(PcaChannelToServoChannel(pca, 3))
+foo, bar, baz, zed = (
+    joint.ServoJointController(channel)
+    for channel in joint.PwmChannel.from_channel_numbers((0,1,2,3,))
+)
 
 grasper = Grasper(zed)
-controller.LeftButtonClicked.handler = grasper.openclose
-
-sensitivity = -1 / 3.0
 
 def handle_wheel_movement(event):
     baz.angle += event.delta
 def handle_x_movement(event):
-    foo.angle += event.delta * sensitivity
+    foo.angle -= event.delta
 def handle_y_movement(event):
-    bar.angle += event.delta * sensitivity
+    bar.angle -= event.delta
 
-controller.WheelMoved.handler = handle_wheel_movement
-controller.MouseMovedX.handler = handle_x_movement
-controller.MouseMovedY.handler = handle_y_movement
+controller.WheelMoved.register_handler(handle_wheel_movement)
+controller.MouseMovedX.register_handler(handle_x_movement)
+controller.MouseMovedY.register_handler(handle_y_movement)
 
-reader = controller.MouseReader(daemon=True)
+from daveshed.legobot.inputs.base import UserInputEventConsumer
+from daveshed.legobot.inputs.mouse import MouseInputEvent
+import inputs
+
+mouse = inputs.devices.mice[0]
+
+reader = UserInputEventConsumer(
+    device=mouse,
+    event_type=MouseInputEvent,
+    daemon=True)
 reader.start()
 
