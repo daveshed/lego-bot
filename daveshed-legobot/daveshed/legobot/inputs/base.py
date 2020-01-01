@@ -84,11 +84,13 @@ class UserInputEventConsumer(threading.Thread):
         while not self.stop.is_set():
             try:
                 [raw_event] = self._device.read()
+                _LOGGER.debug("Captured input event <%r, %r, %r>",
+                    raw_event.ev_type, raw_event.code, raw_event.state)
             except inputs.UnknownEventCode as error:
                 _LOGGER.warning("Unknown event error: %r" % error)
             parsed_event = self._event_type.from_raw_input_event(raw_event)
             if parsed_event:
-                _LOGGER.info("Got event %r", parsed_event)
+                _LOGGER.debug("Got event %r", parsed_event)
                 if parsed_event.is_real_time:
                     parsed_event.consume()
                 else:
