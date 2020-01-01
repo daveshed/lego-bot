@@ -3,7 +3,7 @@ import logging
 from daveshed.legobot.inputs import trackpad as controller
 from daveshed.legobot import stub
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 class Grasper:

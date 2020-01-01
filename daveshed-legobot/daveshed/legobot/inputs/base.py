@@ -60,7 +60,7 @@ class UserInputEventBase:
             else:
                 return None
         except KeyError:
-            raise AssertionError("Unknown event %r" % event)
+            raise AssertionError("Unknown event type %r" % event)
 
     @staticmethod
     def _parse_movement_event(event):
@@ -69,6 +69,54 @@ class UserInputEventBase:
     @staticmethod
     def _parse_key_event(event):
         raise NotImplementedError
+
+
+class AbsolutePositionX(UserInputEventBase):
+
+    def __init__(self, event):
+        self._position = event.state
+        super().__init__(event)
+
+    @property
+    def position(self):
+        return self._position
+
+
+class AbsolutePositionY(UserInputEventBase):
+
+    def __init__(self, event):
+        self._position = event.state
+        super().__init__(event)
+
+    @property
+    def position(self):
+        return self._position
+
+
+class RelativePositionX(UserInputEventBase):
+
+    def __init__(self, event):
+        self._delta = event.state
+        super().__init__(event)
+
+    @property
+    def delta(self):
+        return self._delta
+
+
+class RelativePositionY(UserInputEventBase):
+
+    def __init__(self, event):
+        self._delta = event.state
+        super().__init__(event)
+
+    @property
+    def delta(self):
+        return self._delta
+
+
+class ButtonClicked(UserInputEventBase): pass
+class ButtonReleased(UserInputEventBase): pass
 
 
 class UserInputEventConsumer(threading.Thread):

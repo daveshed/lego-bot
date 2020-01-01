@@ -1,10 +1,10 @@
 import threading
 import inputs
 
-from daveshed.legobot.inputs.base import UserInputEventBase
+from daveshed.legobot.inputs import base as events
 
 
-class TrackpadInputEvent(UserInputEventBase):
+class TrackpadInputEvent(events.UserInputEventBase):
 
     @staticmethod
     def _parse_movement_event(event):
@@ -24,7 +24,9 @@ class TrackpadInputEvent(UserInputEventBase):
             ('BTN_LEFT', 1,): LeftButtonClicked,
             ('BTN_LEFT', 0,): LeftButtonReleased,
             ('BTN_RIGHT', 1,): RightButtonClicked,
-            ('BTN_RIGHT', 0,): RightButtonReleased,            ('BTN_MIDDLE', 1,): MiddleButtonClicked,
+            ('BTN_RIGHT', 0,): RightButtonReleased,
+            ('BTN_TOUCH', 1,): PadTouched,
+            ('BTN_TOUCH', 0,): PadReleased,
         }
         try:
             event_type = event_map[(event.code, event.state,)]
@@ -33,23 +35,11 @@ class TrackpadInputEvent(UserInputEventBase):
             return None
 
 
-class TrackpadMovement(TrackpadInputEvent):
-
-    def __init__(self, event):
-        self._position = event.state
-        super().__init__(event)
-
-    @property
-    def position(self):
-        return self._position
-
-
-class TrackpadMovedX(TrackpadMovement): pass
-class TrackpadMovedY(TrackpadMovement): pass
-class WheelMoved(TrackpadMovement): pass
-class LeftButtonClicked(TrackpadInputEvent): pass
-class LeftButtonReleased(TrackpadInputEvent): pass
-class RightButtonClicked(TrackpadInputEvent): pass
-class RightButtonReleased(TrackpadInputEvent): pass
-class MiddleButtonClicked(TrackpadInputEvent): pass
-class MiddleButtonReleased(TrackpadInputEvent): pass
+class TrackpadMovedX(events.AbsolutePositionX): pass
+class TrackpadMovedY(events.AbsolutePositionY): pass
+class LeftButtonClicked(events.ButtonClicked): pass
+class LeftButtonReleased(events.ButtonReleased): pass
+class RightButtonClicked(events.ButtonClicked): pass
+class RightButtonReleased(events.ButtonReleased): pass
+class PadTouched(events.ButtonClicked): pass
+class PadReleased(events.ButtonReleased): pass
