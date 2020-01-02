@@ -137,16 +137,30 @@ class UserInputEventConsumer(threading.Thread):
 
     def run(self):
         while not self.stop.is_set():
-            try:
-                [raw_event] = self._device.read()
-                _LOGGER.debug("Captured input event <%r, %r, %r>",
-                    raw_event.ev_type, raw_event.code, raw_event.state)
-            except inputs.UnknownEventCode as error:
-                _LOGGER.warning("Unknown event error: %r" % error)
-            parsed_event = self._event_type.from_raw_input_event(raw_event)
-            if parsed_event:
-                _LOGGER.debug("Got event %r", parsed_event)
-                if parsed_event.is_real_time:
-                    parsed_event.consume()
-                else:
-                    _LOGGER.warning("Event is not real time. Rejected.")
+            event = self._get_next_event()
+            if not event:
+                continue
+            if not event.is_real_time:
+                self._handle_stale_event(event)
+                continue
+            self._handle_real_time_event(event)
+
+    def _get_next_event(self):
+        result = None
+        try:
+            [raw_event] = self._device.read()
+            _LOGGER.debug("Captured input event <%r, %r, %r>",
+                raw_event.ev_type, raw_event.code, raw_event.state)
+            result = self._event_type.from_raw_input_event(raw_event)
+        except inputs.UnknownEventCode as error:
+            _LOGGER.warning("Unknown event error: %r" % error)
+        return result
+
+    @staticmethod
+    def _handle_stale_event(event):
+        _LOGGER.warning("Event %r is not real time. Rejected.", event)
+
+    @staticmethod
+    def _handle_real_time_event(event):
+        _LOGGER.debug("Got event %r", event)
+        event.consume()
