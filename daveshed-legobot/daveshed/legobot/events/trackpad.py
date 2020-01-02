@@ -1,7 +1,7 @@
 import threading
 import inputs
 
-from daveshed.legobot.inputs import base as events
+from daveshed.legobot.events import base as events
 
 
 class TrackpadInputEvent(events.UserInputEventBase):

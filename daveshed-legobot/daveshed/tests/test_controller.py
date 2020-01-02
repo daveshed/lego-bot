@@ -9,7 +9,7 @@ class ControllerTestGroup(unittest.TestCase):
 
     def setUp(self):
         self.robot = mock.Mock(name="Robot", spec_set=Robot)
-        self.controller = controller.ControllerBase(self.robot)
+        self.controller = controller.RobotControllerBase(self.robot)
 
     def test_relative_movement_moves_robot(self):
         self.controller.handle_relative_x(2)
