@@ -14,6 +14,7 @@ class UserInputEventBase:
     """
     _handlers = {}
     _DEADLINE_SEC = 0.2
+    _lock = threading.Lock()
 
     def __init__(self, event):
         self._timestamp = event.timestamp
@@ -28,19 +29,25 @@ class UserInputEventBase:
 
     @classmethod
     def register_handler(cls, handler):
-        cls._handlers[cls] = handler
+        with cls._lock:
+            cls._handlers[cls] = handler
 
     @classmethod
     def deregister_handler(cls):
-        cls._handlers.pop(cls)
+        with cls._lock:
+            try:
+                cls._handlers.pop(cls)
+            except KeyError:
+                # no handler is registered so do nothing.
+                pass
 
     def consume(self):
         try:
             callback = self._handlers[type(self)]
+            _LOGGER.debug("Calling handler %r", callback)
             callback(self)
         except KeyError:
-            # no handler registered
-            pass
+            _LOGGER.debug("%r has no handlers", self)
 
     @classmethod
     def from_raw_input_event(cls, event):

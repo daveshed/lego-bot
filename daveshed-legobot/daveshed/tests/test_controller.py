@@ -48,3 +48,10 @@ class ControllerTestGroup(unittest.TestCase):
         self.robot.move_y.assert_not_called()
         self.robot.move_z.assert_called_with(rate=3.3 - 0.0)
         self.robot.stop.assert_called_once()
+
+    def test_cannot_handle_absolute_position_updates_without_notification(self):
+        with self.assertRaises(RuntimeError):
+            self.controller.handle_absolute_z(3.3)
+        self.robot.move_x.assert_not_called()
+        self.robot.move_y.assert_not_called()
+        self.robot.move_z.assert_not_called()

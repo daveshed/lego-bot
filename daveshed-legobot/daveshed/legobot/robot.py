@@ -1,4 +1,7 @@
 import abc
+import logging
+
+_LOGGER = logging.getLogger("ROBOT")
 
 
 class Robot(abc.ABC):
@@ -74,3 +77,33 @@ class Robot(abc.ABC):
         Disable control of the robot so that it will not respond to instructions
         to instructions to move or open/close the grasper etc.
         """
+
+
+class RobotStub(Robot):
+
+    def move_x(self, rate):
+        _LOGGER.info("Moving in x with rate %r...", rate)
+
+    def move_y(self, rate):
+        _LOGGER.info("Moving in y with rate %r...", rate)
+
+    def move_z(self, rate):
+        _LOGGER.info("Moving in z with rate %r...", rate)
+
+    def stop(self):
+        _LOGGER.info("Stop moving")
+
+    def open_grasper(self):
+        _LOGGER.info("Opening grasper...")
+
+    def close_grasper(self):
+        _LOGGER.info("Closing grasper...")
+
+    def home(self):
+        _LOGGER.info("Homing...")
+
+    def enable(self):
+        _LOGGER.info("Enabled")
+
+    def disable(self):
+        _LOGGER.info("Disabled")
