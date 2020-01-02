@@ -9,10 +9,13 @@ from daveshed.legobot.robot import RobotStub
 
 logging.basicConfig(level=logging.INFO)
 
+# A human input device...
+mouse = inputs.devices.mice[0]
+# A stubbed robot implementation so we can demo without hardware...
 robot = RobotStub()
+# Now create and run the trackpad controller and wire it up to the robot...
 controller = TrackpadController(robot)
 controller.register_handlers(trackpad_events)
-mouse = inputs.devices.mice[0]
 reader = UserInputEventConsumer(
     device=mouse,
     event_type=trackpad_events.TrackpadInputEvent,
