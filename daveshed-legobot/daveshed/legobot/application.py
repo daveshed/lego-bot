@@ -57,4 +57,5 @@ class Application:
 
     def terminate(self):
         """Graceful teardown the application"""
+        self._robot.home()
         self._event_consumer.terminate()

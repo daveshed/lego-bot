@@ -14,39 +14,30 @@ class Robot(abc.ABC):
     """
 
     @abc.abstractmethod
-    def move_x(self, rate):
+    def move_x(self, distance):
         """
-        Respond to a movement command in the x-axis at the specified rate
+        Respond to a movement command in the x-axis over the specified distance
 
         Args:
-            rate (float): the rate at which to move in the x direction in units
-                per second.
+            distance (float): the distance to move
         """
 
     @abc.abstractmethod
-    def move_y(self, rate):
+    def move_y(self, distance):
         """
-        Respond to a movement command in the y-axis at the specified rate
+        Respond to a movement command in the y-axis over the specified distance
 
         Args:
-            rate (float): the rate at which to move in the y direction in units
-                per second.
+            distance (float): the distance to move
         """
 
     @abc.abstractmethod
-    def move_z(self, rate):
+    def move_z(self, distance):
         """
-        Respond to a movement command in the z-axis at the specified rate
+        Respond to a movement command in the y-axis over the specified distance
 
         Args:
-            rate (float): the rate at which to move in the x direction in units
-                per second.
-        """
-
-    @abc.abstractmethod
-    def stop(self):
-        """
-        Stop moving following a move command.
+            distance (float): the distance to move
         """
 
     @abc.abstractmethod
@@ -87,14 +78,14 @@ class RobotStub(Robot):
     A stubbed robot implementation that simply logs method calls using the
     python logger.
     """
-    def move_x(self, rate):
-        _LOGGER.info("Moving in x with rate %r...", rate)
+    def move_x(self, distance):
+        _LOGGER.info("Moving %r in x...", distance)
 
-    def move_y(self, rate):
-        _LOGGER.info("Moving in y with rate %r...", rate)
+    def move_y(self, distance):
+        _LOGGER.info("Moving %r in y...", distance)
 
-    def move_z(self, rate):
-        _LOGGER.info("Moving in z with rate %r...", rate)
+    def move_z(self, distance):
+        _LOGGER.info("Moving %r in z...", distance)
 
     def stop(self):
         _LOGGER.info("Stop moving")
@@ -113,3 +104,51 @@ class RobotStub(Robot):
 
     def disable(self):
         _LOGGER.info("Disabled")
+
+
+class ThreeDofLegoRobot(Robot):
+    """
+    A simple lego robot implementation that has three joints and a grasper.
+
+    Args:
+        joints (tuple): `JointController`s corresponding to the robot's joints
+        grasper (daveshed.legobot.grasper.Grasper): a grasper to be part of the
+            robot
+    """
+    def __init__(self, joints, grasper):
+        self._joints = joints
+        self._grasper = grasper
+        self.home()
+
+    def move_x(self, distance):
+        _LOGGER.info("Moving %r in x...", distance)
+        self._joints[0].angle += distance
+
+    def move_y(self, distance):
+        _LOGGER.info("Moving %r in y...", distance)
+        self._joints[1].angle += distance
+
+    def move_z(self, distance):
+        _LOGGER.info("Moving %r in z...", distance)
+        self._joints[2].angle += distance
+
+    def open_grasper(self):
+        _LOGGER.info("Opening grasper...")
+        self._grasper.open()
+
+    def close_grasper(self):
+        _LOGGER.info("Closing grasper...")
+        self._grasper.close()
+
+    def home(self):
+        _LOGGER.info("Homing...")
+        for joint in self._joints:
+            joint.home()
+
+    def enable(self):
+        _LOGGER.info("Enabled")
+        # FIXME: requires states
+
+    def disable(self):
+        _LOGGER.info("Disabled")
+        # FIXME: requires states

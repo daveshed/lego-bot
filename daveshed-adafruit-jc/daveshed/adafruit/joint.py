@@ -3,6 +3,7 @@ A concrete implementation of the joint controller interface defined by the the
 legobot.
 """
 import logging
+import time
 
 import Adafruit_PCA9685
 
@@ -92,17 +93,16 @@ class ServoJointController(JointControllerBase):
         self._angle = angle
 
     def home(self):
-        # FIXME
-        pass
-
-    def _set_speed(self, value):
-        # FIXME
-        pass
-
-    @property
-    def speed(self):
-        # FIXME
-        return None
+        delta = self.INITIAL_ANGLE_DEG - self.angle
+        if delta == 0.0:
+            return
+        stride = delta / abs(delta)
+        for angle in range(
+                round(self.angle),
+                round(self.INITIAL_ANGLE_DEG),
+                round(stride)):
+            self.angle = angle
+            time.sleep(0.02)
 
     @classmethod
     def _get_duty_cycle(cls, deg):
