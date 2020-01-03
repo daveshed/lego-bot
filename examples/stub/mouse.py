@@ -6,4 +6,4 @@ from daveshed.legobot.factory import MouseRobotStubFactory
 logging.basicConfig(level=logging.INFO)
 
 factory = MouseRobotStubFactory()
-Application(factory).start()
+application = Application(factory).start()

@@ -6,4 +6,4 @@ from daveshed.legobot.factory import GamepadRobotStubFactory
 logging.basicConfig(level=logging.INFO)
 
 factory = GamepadRobotStubFactory()
-Application(factory).start()
+application = Application(factory).start()
