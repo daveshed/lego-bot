@@ -1,11 +1,13 @@
-import threading
-import inputs
+"""
+Mouse device event definitions
+"""
+from daveshed.legobot.events import base as events
 
-from daveshed.legobot.inputs.base import UserInputEventBase
 
-
-class MouseInputEvent(UserInputEventBase):
-
+class MouseInputEvent(events.UserInputEventBase):
+    """
+    Mouse input event base class
+    """
     @staticmethod
     def _parse_movement_event(event):
         event_map = {
@@ -17,8 +19,7 @@ class MouseInputEvent(UserInputEventBase):
             event_type = event_map[event.code]
             return event_type(event)
         except KeyError:
-            raise AssertionError(
-                "Unrecognised event (%r; %r)" % (event.code, event.state))
+            return None
 
     @staticmethod
     def _parse_key_event(event):
@@ -34,27 +35,18 @@ class MouseInputEvent(UserInputEventBase):
             event_type = event_map[(event.code, event.state,)]
             return event_type(event)
         except KeyError:
-            raise AssertionError(
-                "Unrecognised event (%r; %r)" % (event.code, event.state))
+            return None
 
-
-class MouseMovement(MouseInputEvent):
-
-    def __init__(self, event):
-        self._delta = event.state
-        super().__init__(event)
-
-    @property
-    def delta(self):
-        return self._delta
-
-
-class MouseMovedX(MouseMovement): pass
-class MouseMovedY(MouseMovement): pass
-class WheelMoved(MouseMovement): pass
-class LeftButtonClicked(MouseInputEvent): pass
-class LeftButtonReleased(MouseInputEvent): pass
-class RightButtonClicked(MouseInputEvent): pass
-class RightButtonReleased(MouseInputEvent): pass
-class MiddleButtonClicked(MouseInputEvent): pass
-class MiddleButtonReleased(MouseInputEvent): pass
+# pylint: disable=missing-class-docstring
+# pylint: disable=too-few-public-methods,
+# pylint: disable=multiple-statements
+# pylint: disable=abstract-method
+class MouseMovedX(events.RelativePositionX): pass
+class MouseMovedY(events.RelativePositionY): pass
+class WheelMoved(events.RelativePositionY): pass
+class LeftButtonClicked(events.ButtonClicked): pass
+class LeftButtonReleased(events.ButtonReleased): pass
+class RightButtonClicked(events.ButtonClicked): pass
+class RightButtonReleased(events.ButtonReleased): pass
+class MiddleButtonClicked(events.ButtonClicked): pass
+class MiddleButtonReleased(events.ButtonReleased): pass

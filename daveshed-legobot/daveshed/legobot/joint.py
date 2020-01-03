@@ -1,3 +1,8 @@
+"""
+Joint controller definitions. A base class is available here to enforce
+dependency inversion - lower-level libraries may then implement this base class
+so that the robot library may be ignorant of joint controller implementation.
+"""
 import abc
 import logging
 
@@ -12,6 +17,8 @@ class JointControllerBase(abc.ABC):
     implementations ie. the robot will not depend on low-level libraries rather
     joint controller implementations will depend on the robot library.
     """
+    def __init__(self, angle):
+        self._angle = angle
 
     @property
     def angle(self):
@@ -85,8 +92,8 @@ class FakeJointController(JointControllerBase):
     any physical hardware connected.
     """
     def __init__(self, angle, idx):
+        super().__init__(angle)
         self._home_position = angle
-        self._angle = angle
         self._idx = idx
         _LOGGER.info("Instantiating joint <%r>", self._idx)
 

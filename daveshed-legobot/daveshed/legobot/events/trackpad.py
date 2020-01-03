@@ -1,11 +1,13 @@
-import threading
-import inputs
-
+"""
+Trackpad event definitions.
+"""
 from daveshed.legobot.events import base as events
 
 
 class TrackpadInputEvent(events.UserInputEventBase):
-
+    """
+    Base class for trackpad events
+    """
     @staticmethod
     def _parse_movement_event(event):
         event_map = {
@@ -34,7 +36,10 @@ class TrackpadInputEvent(events.UserInputEventBase):
         except KeyError:
             return None
 
-
+# pylint: disable=missing-class-docstring
+# pylint: disable=too-few-public-methods,
+# pylint: disable=multiple-statements
+# pylint: disable=abstract-method
 class TrackpadMovedX(events.AbsolutePositionX): pass
 class TrackpadMovedY(events.AbsolutePositionY): pass
 class LeftButtonClicked(events.ButtonClicked): pass

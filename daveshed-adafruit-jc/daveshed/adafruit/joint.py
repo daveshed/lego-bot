@@ -1,3 +1,7 @@
+"""
+A concrete implementation of the joint controller interface defined by the the
+legobot.
+"""
 import logging
 
 import Adafruit_PCA9685
@@ -25,16 +29,37 @@ class PwmChannel:
 
     @property
     def duty_cycle(self):
+        """
+        The duty cycle of the pwm output
+
+        Returns:
+            float: the duty cycle
+        """
         return self._duty_cycle
 
     @duty_cycle.setter
     def duty_cycle(self, value):
+        """
+        Sets the duty cycle of pwm output.
+
+        Args:
+            value (float): the duty cycle between 0 and 1
+        """
         assert value > 0.0, "Cannot set negative duty cycle"
+        assert value <= 1.0, "Cannot set duty cycle larger than 1"
         off_time = int(value * self.RESOLUTION)
         self._pca.set_pwm(self._channel, 0, off_time)
 
     @classmethod
     def from_channel_numbers(cls, channels):
+        """
+        A factory method to create pwm channels from an iterable of channel
+        numbers
+
+        Args:
+            iterable of ints: the index of each channel to create a pwm channel
+                on.
+        """
         pca = Adafruit_PCA9685.PCA9685(i2c=i2c_interface)
         pca.frequency = 50
         return (cls(pca, idx) for idx in channels)
@@ -53,10 +78,12 @@ class ServoJointController(JointControllerBase):
     MAX_ANGLE_DEG = 180.0
     MAX_DUTY_CYCLE = 0.5
     INITIAL_ANGLE_DEG = 90
+    _SLOPE = (MAX_DUTY_CYCLE - MIN_DUTY_CYCLE) / (MAX_ANGLE_DEG - MIN_ANGLE_DEG)
+    _INTERCEPT = MIN_DUTY_CYCLE
 
     def __init__(self, channel: PwmChannel):
+        super().__init__(None)
         self._channel = channel
-        self._angle = None
         self.angle = self.INITIAL_ANGLE_DEG
 
     def _set_angle(self, angle):
@@ -79,9 +106,4 @@ class ServoJointController(JointControllerBase):
 
     @classmethod
     def _get_duty_cycle(cls, deg):
-        m = (
-            (cls.MAX_DUTY_CYCLE - cls.MIN_DUTY_CYCLE)
-            / (cls.MAX_ANGLE_DEG - cls.MIN_ANGLE_DEG)
-        )
-        c = cls.MIN_DUTY_CYCLE
-        return (m * deg) + c
+        return (cls._SLOPE * deg) + cls._INTERCEPT

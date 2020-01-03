@@ -5,6 +5,8 @@ low-level driver assumes that the code will be run on an embedded single board
 computer such as a rpi or beaglebone. It assumes an API that is not provided by
 the F232H driver. Therefore this adapter module is needed.
 """
+# this is modified third-party code so let's not pylint it...
+# pylint: skip-file
 import logging
 
 import pyftdi.i2c

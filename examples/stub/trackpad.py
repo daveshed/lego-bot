@@ -18,6 +18,6 @@ controller = TrackpadController(robot)
 controller.register_handlers(trackpad_events)
 reader = UserInputEventConsumer(
     device=mouse,
-    event_type=trackpad_events.TrackpadInputEvent,
+    parser=trackpad_events.TrackpadInputEvent.from_raw_input_event,
     daemon=True)
 reader.start()

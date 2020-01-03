@@ -1,11 +1,13 @@
-import threading
-import inputs
+"""
+Gamepad device event definitions
+"""
+from daveshed.legobot.events import base as events
 
-from daveshed.legobot.inputs.base import UserInputEventBase
 
-
-class GamepadInputEvent(UserInputEventBase):
-
+class GamepadInputEvent(events.UserInputEventBase):
+    """
+    Gamepad input event base class
+    """
     @staticmethod
     def _parse_movement_event(event):
         event_map = {
@@ -22,8 +24,7 @@ class GamepadInputEvent(UserInputEventBase):
             event_type = event_map[(event.code, event.state,)]
             return event_type(event)
         except KeyError:
-            raise AssertionError(
-                "Unrecognised event (%r; %r)" % (event.code, event.state))
+            return None
 
     @staticmethod
     def _parse_key_event(event):
@@ -49,10 +50,11 @@ class GamepadInputEvent(UserInputEventBase):
             event_type = event_map[(event.code, event.state,)]
             return event_type(event)
         except KeyError:
-            raise AssertionError(
-                "Unrecognised event (%r; %r)" % (event.code, event.state))
+            return None
 
-
+# pylint: disable=missing-class-docstring
+# pylint: disable=too-few-public-methods,
+# pylint: disable=multiple-statements
 class AButtonPressed(GamepadInputEvent): pass
 class AButtonReleased(GamepadInputEvent): pass
 class BButtonPressed(GamepadInputEvent): pass

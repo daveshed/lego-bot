@@ -1,3 +1,6 @@
+"""
+Robot class definitions
+"""
 import abc
 import logging
 
@@ -80,7 +83,10 @@ class Robot(abc.ABC):
 
 
 class RobotStub(Robot):
-
+    """
+    A stubbed robot implementation that simply logs method calls using the
+    python logger.
+    """
     def move_x(self, rate):
         _LOGGER.info("Moving in x with rate %r...", rate)
 
