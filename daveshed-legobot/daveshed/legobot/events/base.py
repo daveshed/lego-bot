@@ -244,6 +244,11 @@ class UserInputEventConsumer(threading.Thread):
                 continue
             self._handle_real_time_event(event)
 
+    def terminate(self):
+        """Graceful exit"""
+        self.stop.set()
+        self.join()
+
     def _get_next_event(self):
         result = None
         try:
