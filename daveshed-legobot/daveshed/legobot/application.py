@@ -10,6 +10,9 @@ class AbstractApplicationFactory(abc.ABC):
     """
     Abstract factory required by the application class to create dependencies
     """
+    def __init__(self):
+        self._robot = self._make_robot()
+
     # pylint: disable=too-few-public-methods
     def make_event_consumer(self):
         """
@@ -22,9 +25,12 @@ class AbstractApplicationFactory(abc.ABC):
             parser=self._get_parser(),
             daemon=True)
 
-    @staticmethod
+    @property
+    def robot(self):
+        return self._robot
+
     @abc.abstractmethod
-    def _register_controller():
+    def _register_controller(self):
         return
 
     @staticmethod
@@ -35,6 +41,10 @@ class AbstractApplicationFactory(abc.ABC):
     @staticmethod
     @abc.abstractmethod
     def _get_parser():
+        return
+
+    @abc.abstractmethod
+    def _make_robot(self):
         return
 
 
@@ -49,6 +59,7 @@ class Application:
             dependencies.
     """
     def __init__(self, factory):
+        self._robot = factory.robot
         self._event_consumer = factory.make_event_consumer()
 
     def start(self):

@@ -1,10 +1,10 @@
 import logging
 
 from daveshed.legobot.application import Application
-from daveshed.legobot.factory import GamepadLegoRobotFactory
+from daveshed.legobot.factory import TrackpadLegoRobotFactory
 
 logging.basicConfig(level=logging.INFO)
 
-factory = GamepadLegoRobotFactory()
+factory = TrackpadLegoRobotFactory()
 application = Application(factory)
 application.start()
