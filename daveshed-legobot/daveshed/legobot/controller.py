@@ -92,10 +92,81 @@ class RobotControllerBase:
         raise NotImplementedError
 
 
+class GamepadController(RobotControllerBase):
+    """
+    A concrete implementation of a `RobotControllerBase` class. It maps events
+    from a gamepad to robot commands.
+    """
+    def register_handlers(self, events):
+        _LOGGER.debug("Registering handlers for %r", events)
+        self._register_for_xy_movements(events)
+        self._register_for_z_movements(events)
+        self._register_grasper_handlers(events)
+
+    def _register_for_xy_movements(self, events):
+        events.UpDpadPressed.register_handler(
+            lambda _: self.handle_relative_position("Y", 1))
+        events.UpDpadReleased.register_handler(
+            lambda _: self.robot.stop())
+        events.DownDpadPressed.register_handler(
+            lambda _: self.handle_relative_position("Y", -1))
+        events.DownDpadReleased.register_handler(
+            lambda _: self.robot.stop())
+        events.LeftDpadPressed.register_handler(
+            lambda _: self.handle_relative_position("X", -1))
+        events.LeftDpadReleased.register_handler(
+            lambda _: self.robot.stop())
+        events.RightDpadPressed.register_handler(
+            lambda _: self.handle_relative_position("X", 1))
+        events.RightDpadReleased.register_handler(
+            lambda _: self.robot.stop())
+
+    def _register_for_z_movements(self, events):
+        events.XButtonPressed.register_handler(
+            lambda _: self.handle_relative_position("Z", 1))
+        events.XButtonReleased.register_handler(
+            lambda _: self.robot.stop())
+        events.BButtonPressed.register_handler(
+            lambda _: self.handle_relative_position("Z", -1))
+        events.BButtonReleased.register_handler(
+            lambda _: self.robot.stop())
+
+    def _register_grasper_handlers(self, events):
+        events.YButtonPressed.register_handler(
+            lambda _: self.robot.open_grasper())
+        events.YButtonReleased.register_handler(
+            lambda _: self.robot.close_grasper())
+
+
+class MouseController(RobotControllerBase):
+    """
+    A concrete implementation of a `RobotControllerBase` class. It maps events
+    from a mouse to robot commands.
+    """
+    def register_handlers(self, events):
+        _LOGGER.debug("Registering handlers for %r", events)
+        self._register_for_relative_movements(events)
+        self._register_grasper_handlers(events)
+
+    def _register_for_relative_movements(self, events):
+        events.MouseMovedX.register_handler(
+            lambda event: self.handle_relative_position("X", event.delta))
+        events.MouseMovedY.register_handler(
+            lambda event: self.handle_relative_position("Y", event.delta))
+        events.WheelMoved.register_handler(
+            lambda event: self.handle_relative_position("Z", event.delta))
+
+    def _register_grasper_handlers(self, events):
+        events.LeftButtonClicked.register_handler(
+            lambda _: self.robot.open_grasper())
+        events.LeftButtonReleased.register_handler(
+            lambda _: self.robot.close_grasper())
+
+
 class TrackpadController(RobotControllerBase):
     """
     A concrete implementation of a `RobotControllerBase` class. It maps events
-    from a laptop trackpad to robot commands.
+    from a trackpad device to the robot.
     """
     def register_handlers(self, events):
         _LOGGER.debug("Registering handlers for %r", events)
