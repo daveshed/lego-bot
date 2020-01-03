@@ -78,7 +78,6 @@ class RobotControllerBase:
         handling has completed.
         """
         _LOGGER.debug("Absolute movement complete")
-        self.robot.stop()
         self.position = None
 
     def register_handlers(self, events):
@@ -106,30 +105,18 @@ class GamepadController(RobotControllerBase):
     def _register_for_xy_movements(self, events):
         events.UpDpadPressed.register_handler(
             lambda _: self.handle_relative_position("Y", 1))
-        events.UpDpadReleased.register_handler(
-            lambda _: self.robot.stop())
         events.DownDpadPressed.register_handler(
             lambda _: self.handle_relative_position("Y", -1))
-        events.DownDpadReleased.register_handler(
-            lambda _: self.robot.stop())
         events.LeftDpadPressed.register_handler(
             lambda _: self.handle_relative_position("X", -1))
-        events.LeftDpadReleased.register_handler(
-            lambda _: self.robot.stop())
         events.RightDpadPressed.register_handler(
             lambda _: self.handle_relative_position("X", 1))
-        events.RightDpadReleased.register_handler(
-            lambda _: self.robot.stop())
 
     def _register_for_z_movements(self, events):
         events.XButtonPressed.register_handler(
             lambda _: self.handle_relative_position("Z", 1))
-        events.XButtonReleased.register_handler(
-            lambda _: self.robot.stop())
         events.BButtonPressed.register_handler(
             lambda _: self.handle_relative_position("Z", -1))
-        events.BButtonReleased.register_handler(
-            lambda _: self.robot.stop())
 
     def _register_grasper_handlers(self, events):
         events.YButtonPressed.register_handler(
