@@ -129,7 +129,14 @@ class MouseController(RobotControllerBase):
     """
     A concrete implementation of a `RobotControllerBase` class. It maps events
     from a mouse to robot commands.
+
+    Attributes:
+        MOVEMENT_THRESHOLD (float): below this value a mouse movement is ignored
+        SENSITIVITY (float): multiplies displacements to control sensitivity
     """
+    MOVEMENT_THRESHOLD = 3.0
+    SENSITIVITY = 0.5
+
     def register_handlers(self, events):
         _LOGGER.debug("Registering handlers for %r", events)
         self._register_for_relative_movements(events)
@@ -137,9 +144,9 @@ class MouseController(RobotControllerBase):
 
     def _register_for_relative_movements(self, events):
         events.MouseMovedX.register_handler(
-            lambda event: self.handle_relative_position("X", event.delta))
+            lambda event: self._handle_xy_position_update("X", event.delta))
         events.MouseMovedY.register_handler(
-            lambda event: self.handle_relative_position("Y", event.delta))
+            lambda event: self._handle_xy_position_update("Y", event.delta))
         events.WheelMoved.register_handler(
             lambda event: self.handle_relative_position("Z", event.delta))
 
@@ -149,14 +156,29 @@ class MouseController(RobotControllerBase):
         events.LeftButtonReleased.register_handler(
             lambda _: self.robot.close_grasper())
 
+    def _handle_xy_position_update(self, axis, delta):
+        if abs(delta) < self.MOVEMENT_THRESHOLD:
+            _LOGGER.debug("Movement below threshold. Ignored.")
+            return
+        self.handle_relative_position(axis, delta * self.SENSITIVITY)
+
 
 class TrackpadController(RobotControllerBase):
     """
     A concrete implementation of a `RobotControllerBase` class. It maps events
     from a trackpad device to the robot.
+
+    Attributes:
+        MOVEMENT_THRESHOLD (float): below this value a mouse movement is ignored
+        SENSITIVITY (float): multiplies displacements to control sensitivity
     """
+    MOVEMENT_THRESHOLD = 3.0
+    SENSITIVITY = 0.05
+
     def register_handlers(self, events):
         _LOGGER.debug("Registering handlers for %r", events)
+        _AbsolutePositionUpdate.sensitivity = self.SENSITIVITY
+        _AbsolutePositionUpdate.movement_threshold = self.MOVEMENT_THRESHOLD
         self._register_for_absolute_movements(events)
         self._register_movement_mode_handlers(events)
         self._register_grasper_handlers(events)
@@ -212,7 +234,6 @@ class TrackpadController(RobotControllerBase):
         events.RightButtonReleased.register_handler(
             lambda _: self._set_xy_movement_mode(events))
 
-
 class _AbsolutePositionValues:
     # pylint: disable=missing-docstring
     def __init__(self):
@@ -241,6 +262,8 @@ class _AbsolutePositionValues:
 
 class _AbsolutePositionUpdate:
     # pylint: disable=missing-docstring
+    movement_threshold = 1
+    sensitivity = 1
 
     @staticmethod
     def from_axis_specifier(axis):
@@ -258,7 +281,9 @@ class _AbsolutePositionUpdate:
             pass
         else:
             delta = self._new_position - self._get_position()
-            self._move_robot(delta)
+            if abs(delta) < self.sensitivity:
+                return
+            self._move_robot(delta * self.sensitivity)
         self._set_position(self._new_position)
 
 
